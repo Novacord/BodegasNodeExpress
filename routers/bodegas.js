@@ -29,4 +29,34 @@ appBodegas.get('/', (req, res) => {
     )
 })
 
+appBodegas.post('/', (req, res) => {
+    const { id, nombre, id_responsable, estado, created_by } = req.body;
+
+    con.query(
+      /*sql*/ `SELECT id FROM users WHERE id = ?`,
+      [id_responsable],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(500).send('Error interno del servidor users');
+        } else if (result.length === 0) {
+          res.status(404).send('El id_responsable especificado no existe en la tabla users');
+        } else {
+          con.query(
+            /*sql*/ `INSERT INTO bodegas (id, nombre, id_responsable, estado, created_by) VALUES (?, ?, ?, ?, ?)`,
+            [id, nombre, id_responsable, estado, created_by],
+            (err, result) => {
+              if (err) {
+                console.log(err);
+                res.status(500).send('Error interno del servidor bodegas');
+              } else {
+                res.status(200).send('Bodega creada exitosamente');
+              }
+            }
+          );
+        }
+      }
+    );
+});
+
 export default appBodegas;

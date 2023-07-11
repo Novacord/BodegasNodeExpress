@@ -10,9 +10,9 @@ CREATE TABLE users(
     update_by BIGINT(20) UNSIGNED,
     foto VARCHAR(255),
     password VARCHAR(255),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    deleted_at TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE bodegas(
@@ -22,9 +22,9 @@ CREATE TABLE bodegas(
     estado TINYINT(4) ,
     created_by BIGINT(20) UNSIGNED ,
     update_by BIGINT(20) UNSIGNED ,
-    created_at TIMESTAMP ,
-    updated_at TIMESTAMP ,
-    deleted_at TIMESTAMP ,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_responsable) REFERENCES users(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
     FOREIGN KEY (update_by) REFERENCES users(id)
@@ -38,9 +38,9 @@ CREATE TABLE historiales(
     id_inventario BIGINT(20) UNSIGNED ,
     created_by BIGINT(20) UNSIGNED ,
     update_by BIGINT(20) UNSIGNED ,
-    created_at TIMESTAMP ,
-    updated_at TIMESTAMP ,
-    deleted_at TIMESTAMP ,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_bodega_origen) REFERENCES bodegas(id),
     FOREIGN KEY (id_bodega_destino) REFERENCES bodegas(id),
     FOREIGN KEY (id_inventario) REFERENCES inventarios(id),
@@ -55,9 +55,9 @@ CREATE TABLE inventarios(
     cantidad INT(11) ,
     created_by BIGINT(20) UNSIGNED ,
     update_by BIGINT(20) UNSIGNED ,
-    created_at TIMESTAMP ,
-    updated_at TIMESTAMP ,
-    deleted_at TIMESTAMP ,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_bodega) REFERENCES bodegas(id),
     FOREIGN KEY (id_producto) REFERENCES productos(id),
     FOREIGN KEY (created_by) REFERENCES users(id),
@@ -71,9 +71,9 @@ CREATE TABLE productos(
     estado TINYINT(4) ,
     created_by BIGINT(20) UNSIGNED ,
     update_by BIGINT(20) UNSIGNED ,
-    created_at TIMESTAMP ,
-    updated_at TIMESTAMP ,
-    deleted_at TIMESTAMP ,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id),
     FOREIGN KEY (update_by) REFERENCES users(id)
 );
