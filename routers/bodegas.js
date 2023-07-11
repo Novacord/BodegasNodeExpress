@@ -53,10 +53,10 @@ appBodegas.post('/', (req, res) => {
                 res.status(200).send('Bodega creada exitosamente');
               }
             }
-          );
+          )
         }
       }
-    );
-});
+    )
+})
 
 export default appBodegas;
