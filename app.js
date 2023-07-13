@@ -11,7 +11,7 @@ app.use("/bodegas", appBodegas);
 
 app.use("/Productos", appProductos);
 
-app.use("/inventarios", appProductos);
+app.use("/inventarios", appInventarios);
 
 const config = JSON.parse(process.env.MY_CONFIG);
 

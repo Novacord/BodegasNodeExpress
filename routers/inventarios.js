@@ -18,41 +18,39 @@ appInventarios.use((req,res,next)=>{
 })
 
 appInventarios.post('/', (req, res) => {
-  const { id, id_producto, id_bodega, cantidad } = req.body;
+      const { id, id_producto, id_bodega, cantidad } = req.body;
+      // Verificar si la combinación de producto y bodega ya existe en el inventario
+      con.query('SELECT * FROM inventarios WHERE id_producto = ? AND id_bodega = ?', [id_producto, id_bodega], (err, rows) => {
+          if (err) {
+              console.log(err);
+              res.status(500).send('Error en la consulta de inventarios');
+              return;
+          }
 
-  // Verificar si la combinación de Bodega y Producto ya existe en la tabla de inventarios
-  const verificarExistenciaQuery = `SELECT * FROM inventarios WHERE id_producto = ? AND id_bodega = ?`;
-  con.query(verificarExistenciaQuery, [id_producto, id_bodega], (err, result) => {
-    if (err) {
-      res.status(500).send('Error al verificar la existencia del registro');
-      return;
-    }
-
-    if (result.length === 0) {
-      // Combinación totalmente nueva, realizar un INSERT en la tabla de inventarios
-      const insertQuery = `INSERT INTO inventarios (id, id_producto, id_bodega, cantidad) VALUES (?, ?, ?, ?)`;
-      con.query(insertQuery, [id, id_producto, id_bodega, cantidad], (err, insertResult) => {
-        if (err) {
-          res.status(500).send('Error al insertar el nuevo registro');
-          return;
-        }
-
-        res.status(200).send('Nuevo registro insertado correctamente');
+          if (rows.length === 0) {
+              // Combinación de producto y bodega no existe, realizar un INSERT
+              con.query('INSERT INTO inventarios (id, id_producto, id_bodega, cantidad) VALUES (?, ?, ?, ?)', [id, id_producto, id_bodega, cantidad], (err, result) => {
+                  if (err) {
+                      console.log(err);
+                      res.status(500).send('Error al insertar en el inventario');
+                      return;
+                  }
+                  res.status(200).send('Registro insertado en el inventario');
+              });
+          } else {
+              const existingCantidad = rows[0].cantidad;
+              const newCantidad = existingCantidad + cantidad;
+              con.query('UPDATE inventarios SET cantidad = ? WHERE id_producto = ? AND id_bodega = ?', [newCantidad, id_producto, id_bodega], (err, result) => {
+                  if (err) {
+                      console.log(err);
+                      res.status(500).send('Error al actualizar el inventario');
+                      return;
+                  }
+                  res.status(200).send('Registro actualizado en el inventario');
+              });
+          }
       });
-    } else {
-      // Combinación existente, realizar un UPDATE en la tabla de inventarios para sumar la cantidad existente con la cantidad nueva
-      const updateQuery = `UPDATE inventarios SET cantidad = cantidad + ? WHERE id_producto = ? AND id_bodega = ?`;
-      con.query(updateQuery, [cantidad, id_producto, id_bodega], (err, updateResult) => {
-        if (err) {
-          res.status(500).send('Error al actualizar el registro existente');
-          return;
-        }
-
-        res.status(200).send('Registro existente actualizado correctamente');
-      });
-    }
-  });
-});
+})
 
 
 export default appInventarios;

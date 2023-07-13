@@ -69,6 +69,29 @@ appProductos.post("/", (req, res) => {
     );
   });
 
+  const addProducto = (req, res) => {
+    try {
+        con.query('INSERT INTO productos(nombre, descripcion, estado, created_by, update_by) VALUES (?, ?, ?, ?, ?)', req.body, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err.message);
+                return;
+            }
+            const productId = result.insertId;
+            
+            con.query('INSERT INTO inventarios(id_bodega, id_producto, created_by, update_by) VALUES (?, ?, ?, ?)', [req.body, productId, created_by, update_by], (err, result) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send(err.message);
+                    return;
+                }
+                res.json(result);
+            });
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+  }
 
 
 export default appProductos;
