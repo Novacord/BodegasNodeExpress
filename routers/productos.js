@@ -1,6 +1,9 @@
+import 'reflect-metadata';
+import { plainToClass } from 'class-transformer'
 import { Router } from "express";
 import mysql from "mysql2";
 import dotenv from "dotenv";
+import { validacionProductos } from "../controller/validacionProductos.js";
 
 dotenv.config();
 
@@ -14,6 +17,16 @@ appProductos.use((req, res, next) => {
     con = mysql.createPool(config);
     next();
 })
+
+const validacionData = (req, res, next) => {
+  try {
+    let data = plainToClass(validacionProductos, req.body);
+    console.log(data);
+    next();
+  } catch (error) {
+    res.status(error.status).send(error.message);
+  } 
+}
 
 appProductos.get('/', (req, res) => {
     con.query(
@@ -29,7 +42,7 @@ appProductos.get('/', (req, res) => {
 });
 
 
-appProductos.post("/", (req, res) => {
+appProductos.post("/", validacionData,(req, res) => {
     const { id,nombre,  descripcion,cantidad ,id_inv} = req.body;
     con.query(
       "INSERT INTO productos (id, nombre, descripcion) VALUES (?,?, ?)",
