@@ -1,6 +1,9 @@
+import 'reflect-metadata';
+import { plainToClass } from 'class-transformer'
 import {Router} from 'express';
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
+import {validacionBodegas} from '../controller/validacionBodegas.js';
 
 dotenv.config();
 
@@ -17,6 +20,16 @@ appBodegas.use((req,res,next)=>{
     next();
 })
 
+const validacionData = (req, res, next) => {
+    try {
+      let data = plainToClass(validacionBodegas, req.body);
+      console.log(data);
+      next();
+    } catch (error) {
+      res.status(error.status).send(error.message);
+    } 
+}
+
 appBodegas.get('/', (req, res) => {
     con.query(
         /*sql*/`SELECT * FROM bodegas ORDER BY nombre ASC`,
@@ -29,7 +42,7 @@ appBodegas.get('/', (req, res) => {
     )
 })
 
-appBodegas.post('/', (req, res) => {
+appBodegas.post('/', validacionData, (req, res) => {
     const { id, nombre, id_responsable, estado, created_by } = req.body;
 
     con.query(

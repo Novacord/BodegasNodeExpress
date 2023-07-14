@@ -1,6 +1,9 @@
+import 'reflect-metadata';
+import { plainToClass } from 'class-transformer'
 import {Router} from 'express';
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
+import {validacionInventarios} from '../controller/validacionInventarios.js';
 
 dotenv.config();
 
@@ -16,8 +19,17 @@ appInventarios.use((req,res,next)=>{
     con = mysql.createPool(config);
     next();
 })
+const validacionData = (req, res, next) => {
+    try {
+      let data = plainToClass(validacionInventarios, req.body);
+      console.log(data);
+      next();
+    } catch (error) {
+      res.status(error.status).send(error.message);
+    } 
+}
 
-appInventarios.post('/', (req, res) => {
+appInventarios.post('/', validacionData, (req, res) => {
       const { id, id_producto, id_bodega, cantidad } = req.body;
       // Verificar si la combinación de producto y bodega ya existe en el inventario
       con.query('SELECT * FROM inventarios WHERE id_producto = ? AND id_bodega = ?', [id_producto, id_bodega], (err, rows) => {
