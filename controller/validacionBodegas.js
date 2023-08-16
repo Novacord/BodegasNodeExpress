@@ -24,7 +24,7 @@ __decorate([
         if (data && typeof value == "number")
             return Number(value);
         else
-            throw { status: 401, message: "error en el id" };
+            throw { status: 401, message: "error en el ID" };
     }),
     Expose({ name: "ID" }),
     IsDefined({ message: () => { throw { status: 401, message: `el campo ID es obligatorio` }; } }),
@@ -36,7 +36,7 @@ __decorate([
         if (data)
             return value;
         else
-            throw { status: 401, message: "error en el nombre" };
+            throw { status: 401, message: "error en el NAME" };
     }),
     Expose({ name: "NAME" }),
     IsDefined({ message: () => { throw { status: 401, message: `el campo NAME es obligatorio` }; } }),

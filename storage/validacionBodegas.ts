@@ -5,20 +5,20 @@ export class validacionBodegas{
     @Transform(({ value }) =>{
         let data = /^[0-9]+$/g.test(value);
         if(data && typeof value == "number") return Number(value);
-        else throw {status: 401, message: "error en el id"}
+        else throw {status: 401, message: "error en el ID"}
     })
     @Expose({name: "ID"})
 
     @IsDefined({ message: ()=>{ throw { status: 401, message: `el campo ID es obligatorio`}} })
     id: number;
     
+    
     @Transform(({value})=>{
         let data = /^[a-zA-Z]+$/g.test(value);
         if(data)return value;
-        else throw {status: 401, message: "error en el nombre"}
+        else throw {status: 401, message: "error en el NAME"}
     })
     @Expose({name: "NAME"})
-    
     @IsDefined({ message: ()=>{ throw { status: 401, message: `el campo NAME es obligatorio`}} })
     nombre: string;
 

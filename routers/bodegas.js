@@ -1,75 +1,52 @@
 import 'reflect-metadata';
 import { plainToClass } from 'class-transformer'
 import {Router} from 'express';
-import mysql from 'mysql2';
 import dotenv from 'dotenv';
-import {validacionBodegas} from '../controller/validacionBodegas.js';
+import middlewareBodegas from '../middlewares/middlewareBodegas.js';
+import { con } from '../db/atlas.js';
 
 dotenv.config();
 
 const appBodegas = Router();
 
-let con = undefined;
+appBodegas.get('/', async(req, res) => {
+  const db = await con(); 
+  const bodegas = db.collection("bodegas"); 
+  const result = await bodegas.find().sort({ nombre: 1 }).toArray();
+  res.send(result);
+});
 
-//CREDENCIALES = {"host": "localhost", "user": "campus", "password": "campus2023", "database": "Nova" , "port": 3306 }
+appBodegas.post('/', middlewareBodegas, async (req, res) => {
+  const { id, nombre, id_responsable, estado, created_by } = req.body;
+  const db = await con();
+  const bodegas = db.collection("bodegas");
+  const users = db.collection("users");
 
-const config = JSON.parse(process.env.CREDENCIALES);
+  const userExists = await users.findOne({ id: id_responsable });
 
-appBodegas.use((req,res,next)=>{
-    con = mysql.createPool(config);
-    next();
-})
+  if (!userExists) {
+    return res.status(404).send('El id_responsable especificado no existe');
+  }
 
-const validacionData = (req, res, next) => {
-    try {
-      let data = plainToClass(validacionBodegas, req.body);
-      console.log(data);
-      next();
-    } catch (error) {
-      res.status(error.status).send(error.message);
-    } 
-}
+  const nuevoDocumento = {
+    id,
+    nombre,
+    id_responsable,
+    estado,
+    created_by,
+    created_at: new Date(),
+    update_by: null,
+    updated_at: null,
+    deleted_at: null
+  };
 
-appBodegas.get('/', (req, res) => {
-    con.query(
-        /*sql*/`SELECT * FROM bodegas ORDER BY nombre ASC`,
-        (err,data,fils)=>{
-            console.log(err);
-            console.log(data);
-            console.log(fils);
-            res.status(200).send(data);
-        }
-    )
-})
-
-appBodegas.post('/', validacionData, (req, res) => {
-    const { id, nombre, id_responsable, estado, created_by } = req.body;
-
-    con.query(
-      /*sql*/ `SELECT id FROM users WHERE id = ?`,
-      [id_responsable],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          res.status(500).send('Error interno del servidor users');
-        } else if (result.length === 0) {
-          res.status(404).send('El id_responsable especificado no existe en la tabla users');
-        } else {
-          con.query(
-            /*sql*/ `INSERT INTO bodegas (id, nombre, id_responsable, estado, created_by) VALUES (?, ?, ?, ?, ?)`,
-            [id, nombre, id_responsable, estado, created_by],
-            (err, result) => {
-              if (err) {
-                console.log(err);
-                res.status(500).send('Error interno del servidor bodegas');
-              } else {
-                res.status(200).send('Bodega creada exitosamente');
-              }
-            }
-          )
-        }
-      }
-    )
-})
+  try {
+    await bodegas.insertOne(nuevoDocumento);
+    res.status(200).send('Bodega creada exitosamente');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error interno del servidor bodegas');
+  }
+});
 
 export default appBodegas;
